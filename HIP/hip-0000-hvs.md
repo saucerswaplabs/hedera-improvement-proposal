@@ -14,14 +14,14 @@ updated: 2023-04-07
 
 ## Abstract
 
-For thousands of years, voting has played a central role in democratic society. Citizens vote to express preferences, hold their 
-representatives accountable, and shape the nature of governance. The health of a democracy depends on the inclusiveness and integrity 
-of its vote.
+For thousands of years, voting has played a key role in democratic society. Citizens vote to express preferences, hold their 
+representatives accountable, and shape the nature of governance. The health of a democracy depends on the inclusiveness and 
+integrity of its vote.
 
-Voting is just as central to governance of a decentralized application (dApp). An ideal vote distributes power among token holders to 
-make decisions, resolve conflicts, and evolve the protocol. But this ideal requires a ledger that can support fast, fair, and secure 
-on-chain voting, at a scale of millions of token holders. An ideal ledger would also allow a dApp to use a vote's outcome as an input 
-to its native programmability and embedded economics. We propose to make Hedera such a ledger. 
+Voting is just as critical to governance of a decentralized application (dApp). An ideal vote distributes power among token holders to 
+make decisions, resolve conflicts, and evolve the protocol. But this ideal does require a ledger that can support fast, fair, and secure 
+on-chain voting, at a scale of millions or billions of token holders. An ideal ledger would also allow a dApp to use a vote's outcome as 
+an input to its native programmability and embedded economics. We propose to make Hedera such a ledger. 
 
 There are five main aspects of our proposal.
   1. The protocol adds a Hedera Voting Service (HVS) that creates and manages entities of type `Vote`.
