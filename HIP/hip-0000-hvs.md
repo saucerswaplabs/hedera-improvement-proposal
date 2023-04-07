@@ -64,23 +64,30 @@ voting power, it will remain possible to transfer units of `0.0.T` at 10,000 tra
   
 ## Specification
 
-## Voting algorithms
-
-{{TODO - ???}}
-
-### HAPI changes
+### HAPI protocol extensions
 
 {{TODO - Neeha, Michael}}
 
-### Data structures
+#### The `Vote` entity
+
+{{TODO - ALL}}
+
+#### Nature of an `Outcome` 
+
+{{TODO - Neeha, Michael}}
+
+#### A `Key` for `Vote`-controlled assets
+
+### Algorithms and data structures
 
 {{TODO - Cody}}
 
-### 
-
 ## Backwards Compatibility
 
-As HVS is an entirely new protocol dimension, the only backward
+Since HVS is an entirely new dimension to the protocol, strictly speaking there are no issues of backwards compatibility; but we may still
+ask about its possible impact on the existing protocol. For a detailed analysis on performance and scalability impacts, please see the 
+section on algorithms and data structures. For information on how existing entities might opt-in to `Vote`-controlled authorization 
+patterns, please visit the section on the new `Key{control_archetype=Vote}` type.
 
 ## Security Implications
 
