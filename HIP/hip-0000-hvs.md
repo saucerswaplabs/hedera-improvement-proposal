@@ -15,8 +15,8 @@ updated: 2023-04-07
 ## Abstract
 
 For thousands of years, voting has played a key role in democratic society. Citizens vote to express preferences, hold their 
-representatives accountable, and shape the nature of governance. The health of a democracy depends on the inclusiveness and 
-integrity of its vote.
+representatives accountable, and shape the nature of their government. The health of a democracy depends on the inclusiveness 
+and integrity of its vote.
 
 Voting is just as critical to governance of a decentralized application (dApp). An ideal vote distributes power among token holders to 
 make decisions, resolve conflicts, and evolve the protocol. But this ideal does require a ledger that can support fast, fair, and secure 
