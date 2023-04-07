@@ -31,7 +31,7 @@ There are five main aspects of our proposal.
   5. The `Key` entity adds a `Vote`-derived authorization mode.
 
 Below we specify all this in detail, giving special attention to the performance impact on the existing Hedera protocol. For example, 
-we will show that even if every holder of a fungible Hedera token `0.0.T` was voting in multiple HVS elections for which `0.0.T` has 
+we will show that even if every holder of a fungible Hedera token `0.0.T` is voting in multiple HVS elections for which `0.0.T` has 
 voting power, it will remain possible to transfer units of `0.0.T` at 10,000 transactions per second (TPS).
 
 ## Motivation
