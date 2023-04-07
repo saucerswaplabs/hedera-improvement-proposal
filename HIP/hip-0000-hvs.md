@@ -8,7 +8,7 @@ category: Core
 needs-council-approval: Yes
 status: Draft
 created: 2023-04-07
-discussions-to: {{TODO - Tarzan, Vecturne}}
+discussions-to: _TODO - Tarzan, Vecturne_
 updated: 2023-04-07
 ---
 
@@ -38,49 +38,49 @@ voting power, it will remain possible to transfer units of `0.0.T` at 10,000 tra
 
 ### Prior art and ad-hoc Hedera voting schemes
 
-{{TODO - Michael}}
+_TODO - Michael_
 
 ### Token utility
 
-{{TODO - Tarzan, Vecturne}}
+_TODO - Tarzan, Vecturne_
 
 ## Rationale
 
 ### Voting algorithms
 
-{{TODO - ???}}
+_TODO - ???_
 
 ### Data structures
 
-{{TODO - Cody}}
+_TODO - Cody_
 
 ### HAPI changes
 
-{{TODO - Neeha, Michael}}
+_TODO - Neeha, Michael_
 
 ## User stories
 
-{{TODO - ALL}}
+_TODO - ALL_
   
 ## Specification
 
 ### HAPI protocol extensions
 
-{{TODO - Neeha, Michael}}
+_TODO - Neeha, Michael_
 
 #### The `Vote` entity
 
-{{TODO - ALL}}
+_TODO - ALL_
 
 #### Nature of an `Outcome` 
 
-{{TODO - Neeha, Michael}}
+_TODO - Neeha, Michael_
 
 #### A `Key` for `Vote`-controlled assets
 
 ### Algorithms and data structures
 
-{{TODO - Cody}}
+_TODO - Cody_
 
 ## Backwards Compatibility
 
@@ -93,31 +93,31 @@ patterns, please visit the section on the new `Key{control_archetype=Vote}` type
 
 ### Denial of service attacks
 
-{{TODO - Cody}}
+_TODO - Cody_
 
 ### Vote-derived authorization
 
-{{TODO - Michael}}
+_TODO - Michael_
 
 ## How to Teach This
 
-{{TODO - ALL}}
+_TODO - ALL_
 
 ## Reference Implementation
 
-{{TODO - ALL}}
+_TODO - ALL_
 
 ## Rejected Ideas
 
-{{TODO - ALL}}
+_TODO - ALL_
 
 ## Open Issues
 
-{{TODO - ALL}}
+_TODO - ALL_
 
 ## References
 
-{{TODO - ALL}}
+_TODO - ALL_
 
 ## Copyright/license
 
