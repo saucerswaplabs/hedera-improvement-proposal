@@ -20,8 +20,8 @@ of its vote.
 
 Voting is just as central to governance of a decentralized application (dApp). An ideal vote distributes power among token holders to 
 make decisions, resolve conflicts, and evolve the protocol. But this ideal requires a ledger that can support fast, fair, and secure 
-on-chain voting, at a scale of millions of token holders. An ideal ledger would also allow a dApp use a vote's outcome as an input to 
-its native programmability and embedded economics. We propose to make Hedera such a ledger. 
+on-chain voting, at a scale of millions of token holders. An ideal ledger would also allow a dApp to use a vote's outcome as an input 
+to its native programmability and embedded economics. We propose to make Hedera such a ledger. 
 
 There are five main aspects of our proposal.
   1. The protocol adds a Hedera Voting Service (HVS) that creates and manages entities of type `Vote`.
@@ -30,9 +30,9 @@ There are five main aspects of our proposal.
   4. An `Outcome` of a `Vote` can trigger any authorized transaction, e.g. `TokenMint`.
   5. The `Key` entity adds a `Vote`-derived authorization mode.
 
-In what follows we will specify each aspect in detail, giving special attention to the performance impact of HVS on the existing
-Hedera protocol. For example, we will show that even if every holder of a fungible Hedera token was voting in multiple elections 
-for which that token had voting power, it would remain possible to transfer units of this token at 10,000 transactions per second (TPS).
+Below we specify all this in detail, giving special attention to the performance impact on the existing Hedera protocol. For example, 
+we will show that even if every holder of a fungible Hedera token `0.0.T` was voting in multiple HVS elections for which `0.0.T` has 
+voting power, it will remain possible to transfer units of `0.0.T` at 10,000 transactions per second (TPS).
 
 ## Motivation
 
