@@ -44,6 +44,10 @@ _TODO - Michael_
 
 _TODO - Tarzan, Vecturne_
 
+Decentralized protocols commonly issue governance tokens to users as a reward for using the platform and providing value to the protocol's community (e.g. UNI, SUSHI, CRV, APE). Governance tokens are used to quantify voting power within their respective communities to create proposals and vote on their passage. Token utility is derived from this voting power by allowing token holders to influence the direction of the project and community, and is critical in the formation of a decentralized autonomous organization (DAO). There is already some real-world legal precedents for DAO's. In the United States, the State of Wyoming legislature approved a bill that grants legal company status to DAOs that operate on a blockchain [https://www.wyoleg.gov/2021/Introduced/SF0038.pdf]. 
+
+Decentralized Finance (DeFi) protocols may choose an array of fungible and/or nonfungible tokens to compute voting power in order to minimize liquidity removal and keep operations functioning normally [https://docs.sushi.com/docs/Governance/Proposals%20&%20Voting]. For DeFi protocols, assigning governance power to an arbitrary set of tokens could be beneficial to incentivizing liquidity provision and avoid adversely affecting token reserves.
+
 ## Rationale
 
 ### Voting algorithms
@@ -61,6 +65,12 @@ _TODO - Neeha, Michael_
 ## User stories
 
 _TODO - ALL_
+
+As a user, I want to submit proposals for community-wide voting, and participate in elections on proposals that reach quorum.
+As a user, I want the results of an election to trigger an on-chain result autonomously, if the election pertains to triggering an on-chain transaction, e.g. a token transfer from a project's DAO treasury.
+
+As a developer, I would like to create an election with arbitrary start and end times.
+As a developer, I would like to see election results of past elections, and elections that are open.
   
 ## Specification
 
