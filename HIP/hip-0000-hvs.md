@@ -76,7 +76,413 @@ As a developer, I would like to see election results of past elections, and elec
 
 ### HAPI protocol extensions
 
-_TODO - Neeha, Michael_
+We propose a new gRPC service, the `VotingService.`
+
+```
+/**
+ * The Voting Service lets users create elections where voting power derives from ownership
+ * of HBAR, units of fungible tokens, or NFTs. One election may recognize multiple forms of
+ * voting power. Elections end when either all voting power has been used or a deadline has 
+ * passed. 
+ * 
+ * When creating an election, the user will directly specify the list of choices in the 
+ * election; as well as the ContractID of a smart contract that implements a Hedera-specific
+ * interface IElection. 
+ *  
+ * Upon the election's end, this contract will be called with the full results of the voting.
+ * It must return the id of the elected choice. If it returns anything other than a string 
+ * matching the id of a choice, the election will fail to resolve. 
+ * 
+ * Anywhere a key can be used in the Hedera ledger to enforce an authorization requirement,
+ * that authorization requirement can now be made to depend on the outcome of an election 
+ * by setting a new key type that specifies an election outcome. The key will be active iff
+ * the referenced election has resolved to the given choice.
+ */
+service VotingService {
+    /**
+     * Create a new election with a set of choices that accepts voting not before a start time  
+     * and not after an end time. The election's voting power derives from ownership of the 
+     * given (weighted) set of token denominations (and/or HBAR); and its outcome is decided 
+     * decided by the given contract. This may require authorization, such as a specific admin 
+     * key to sign the transaction.
+     * The response includes the unique identifier for the newly created election.
+     * Request is [ElectionCreateTransactionBody](#proto.ElectionCreateTransactionBody)
+     */
+    rpc createElection (Transaction) returns (TransactionResponse);
+
+    /**
+     * Update an existing election before voting has started. This operation could include 
+     * changing the election details, extending its duration, etc.
+     * If there is an adminKey, it must sign the transaction for updates.
+     * Changes to the adminKey require signatures from both the old and new keys.
+     * Request is [ElectionUpdateTransactionBody](#proto.ElectionUpdateTransactionBody)
+     */
+    rpc updateElection (Transaction) returns (TransactionResponse);
+
+    /**
+     * Delete an election before voting has started.
+     * This operation will make the election unavailable for further actions.
+     * If an adminKey is set, it must sign the transaction to delete the election.
+     * Without an adminKey, this operation will be unauthorized.
+     * Request is [ElectionDeleteTransactionBody](#proto.ElectionDeleteTransactionBody)
+     */
+    rpc deleteElection (Transaction) returns (TransactionResponse);
+
+    /**
+     * Submit or alter a vote in an election by specifying its id, along with the amounts of
+     * one or more tokens or HBAR to use as voting power. The assets used as voting power
+     * are automatically locked until the election resolves; to transfer some or all of the
+     * voted assets, the user must submit a reduced or repudiated vote.
+     * The operation ensures that the vote is valid, authorized, and counted towards the election.
+     * The response includes confirmation of the vote being counted.
+     * Request is [ElectionSubmitVoteTransactionBody](#proto.ElectionSubmitVoteTransactionBody)
+     */
+    rpc submitVote (Transaction) returns (TransactionResponse);
+}
+```
+
+Its four transactions will require a few extensions to the basic types in the system, as below.
+```
+/*
+ * Represents a single choice in an election.
+ */
+message Choice {
+    /*
+     * Unique identifier for the choice. The ledger is agnostic about its interpretation.
+     */
+    string id = 1;
+}
+
+/**
+ * Unique identifier for an election
+ */
+message ElectionID {
+    /**
+     * A nonnegative shard number
+     */
+    int64 shard_num = 1;
+
+    /**
+     * A nonnegative realm number
+     */
+    int64 realm_num = 2;
+
+    /**
+     * A positive election number
+     */
+    int64 election_num = 3;
+}
+
+/**
+ * The outcome of an election.
+ */
+message ElectionOutcome {
+    /**
+     * The id of an election.
+     */
+    ElectionID election_id = 1;
+
+    /**
+     * A choice from that election.
+     */
+    Choice choice = 2;
+}
+
+/*
+ * Represents voting power in an election.
+ */
+message VotingPower {
+    /*
+     * The denomination of a token to be used as voting power in an election; taken
+     * as HBAR if left unset.
+     */
+    TokenID token_id = 1;
+
+    /*
+     * The relative weight of the voting power given to each whole unit of this TokenID 
+     * used to vote.
+     */
+    int64 weight = 2;
+}
+
+/*
+ * Represents a vote in an election for a specific form of voting power.
+ */
+message Vote {
+    /*
+     * The denomination of a token being used as voting power in an election; taken
+     * as HBAR if left unset.
+     */
+    TokenID token_id = 1;
+
+    /*
+     * The amount of the token being voted in its lowest denominated units (e.g., tinybar 
+     * if the denomination is HBAR).
+     */
+    int64 amount = 2;
+}
+```
+
+With these types in hand, we can define the four transactions for the new `VotingService`.
+First, the `ElectionCreateTransactionBody`.
+
+```
+import "basic_types.proto";
+import "duration.proto";
+
+/*
+ * Transaction body for creating a new election.
+ */
+message ElectionCreateTransactionBody {
+    /*
+     * Title of the election.
+     */
+    string title = 1;
+
+    /*
+     * Description of the election.
+     */
+    string description = 2;
+
+    /*
+     * List of choices available in the election.
+     */
+    repeated Choice choices = 3;
+
+    /*
+     * The start time of the election.
+     * This is when the election becomes active and can accept votes.
+     */
+    Timestamp start_time = 4;
+
+    /*
+     * The end time of the election.
+     * This is when the election stops accepting votes and is considered complete.
+     */
+    Timestamp end_time = 5;
+
+    /*
+     * Details of the voting power mechanisms.
+     * This can include units of fungible tokens, NFTs, or HBAR that are used for voting.
+     * Each item in this repeated field represents a different form of voting power.
+     */
+    repeated VotingPower voting_powers = 6;
+
+    /*
+     * Identifier of the smart contract that determines the election outcome.
+     * This contract implements the IElection interface and is called with the full results of the voting.
+     */
+    ContractID decision_contract_id = 7;
+}
+```
+
+Second, the `ElectionUpdateTransactionBody`.
+
+```
+import "basic_types.proto";
+import "duration.proto";
+import "google/protobuf/wrappers.proto";
+
+/*
+ * Transaction body for updating an existing election before its voting window has opened.
+ */
+message ElectionUpdateTransactionBody {
+    /*
+     * Identifier of the election to be updated.
+     */
+    ElectionID election_id = 1;
+
+    /*
+     * Updated title of the election.
+     * This field is optional and can be used to change the title of the election.
+     */
+    google.protobuf.StringValue title = 2;
+
+    /*
+     * Updated description of the election.
+     * This field is optional and can be used to change the description of the election.
+     */
+    google.protobuf.StringValue description = 3;
+
+    /*
+     * Updated list of choices for the election.
+     * This field is optional and can be used to modify the choices available in the election.
+     */
+    repeated Choice choices = 4;
+
+    /*
+     * New start time for the election.
+     * This field is optional and can be used to change the start time of the election.
+     */
+    Timestamp start_time = 5;
+
+    /*
+     * New end time for the election.
+     * This field is optional and can be used to change the end time of the election.
+     */
+    Timestamp end_time = 6;
+
+    /*
+     * Updated details of the voting power mechanisms.
+     * This field is optional and can be used to change the voting tokens or HBAR used for voting.
+     * Each item in this repeated field represents a different form of updated voting power.
+     */
+    repeated VotingPower voting_tokens = 7;
+
+    /*
+     * Identifier of the new smart contract for determining the election outcome.
+     * This field is optional and can be used to change the contract that decides the election outcome.
+     */
+    ContractID decision_contract_id = 8;
+}
+```
+
+Third, the `ElectionDeleteTransactionBody`.
+
+```
+import "basic_types.proto";
+
+/*
+ * Transaction body for deleting an election.
+ */
+message ElectionDeleteTransactionBody {
+    /*
+     * Identifier of the election to be deleted.
+     * This field is required to specify which election is to be removed.
+     */
+    ElectionID election_id = 1;
+}
+```
+
+Fourth, the `ElectionSubmitVoteTransactionBody`.
+
+```
+import "basic_types.proto";
+
+/*
+ * Transaction body for submitting or altering a vote in an election.
+ */
+message ElectionSubmitVoteTransactionBody {
+    /*
+     * Identifier of the election in which to vote.
+     */
+    ElectionID election_id = 1;
+
+    /*
+     * Identifier of the chosen option in the election.
+     * This represents the specific choice the voter is casting their vote for.
+     */
+    string choice_id = 2;
+
+    /*
+     * Details of the voting power being utilized in the vote.
+     * This includes the amounts of one or more tokens or HBAR that are being used as voting power.
+     * The assets used as voting power are locked until the election resolves.
+     */
+    repeated VotingPower voting_powers = 3;
+}
+```
+
+Externalizing the results of these transactions will require extensions to the `TransactionReceipt`
+and `TransactionRecord` messages. For `TransactionReceipt` we need to add a field for the id of a newly
+created election.
+```
+message TransactionReceipt {
+    ...
+
+    /**
+     * In the receipt of an ElectionCreate, the id of the newly created election
+     */
+    ElectionID election_id = 16;
+}
+```
+
+And for `TransactionRecord`, we need to add a repeated field for the cumulative votes for each form of 
+voting power used in an successful `SubmitVote` transaction.
+```
+message TransactionRecord {
+    ...
+
+    /**
+     * In the record of a successful SubmitVote transaction, the new cumulative votes for every form of
+     * voting power used in the vote.
+     */
+    repeated new_cumulative_votes = 22;
+}
+```
+
+Similarly, the externalized results will require new response codes such as the following.
+```
+  /*
+   * The election is currently in progress and cannot be modified.
+   */
+  ELECTION_IN_PROGRESS = 334;
+
+  /*
+   * The election has already concluded.
+   */
+  ELECTION_CLOSED = 335;
+
+  /*
+   * Updating or deleting the election is not possible.
+   */
+  ELECTION_IS_IMMUTABLE = 336;
+
+  /*
+   * The transaction referenced an invalid election.
+   */
+  INVALID_ELECTION_ID = 337;
+
+  /*
+   * The user's voting power (e.g., tokens, HBAR) is insufficient for the attempted vote.
+   */
+  VOTING_POWER_INSUFFICIENT = 338;
+
+  /*
+   * Execution of the smart contract for the election failed.
+   */
+  DECISION_CONTRACT_FAILED = 339;
+
+  /*
+   * The smart contract did not pass validation checks.
+   */
+  INVALID_DECISION_CONTRACT_ID = 340;
+
+  /*
+   * The format of the choice data in the election is invalid.
+   */
+  INVALID_CHOICE_FORMAT = 341;
+
+  /*
+   * The start time specified for the election is invalid.
+   */
+  INVALID_START_TIME = 342;
+
+  /*
+   * The end time specified for the election is invalid.
+   */
+  INVALID_END_TIME = 343;
+
+```
+
+Lastly, to make elections first-class citizens in the protocol's authorization scheme, 
+we will need extend the `Key` message as below.
+```
+message Key {
+    oneof key {
+        ...
+
+        /**  
+         * An election outcome which, upon having occurred, implies this key should be
+         * treated as having an active signature, wherever it appears. For example, if
+         * the payer account for a scheduled transaction has an election outcome key,
+         * its scheduled transaction is executable only if the election resolves to the
+         * given outcome.
+         */
+        ElectionOutcome election_outcome = 9; 
+    }
+}
+```
 
 #### The `Vote` entity
 
